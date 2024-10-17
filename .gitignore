@@ -1,0 +1,113 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# PyCharm project files
+.idea/
+*.iml
+*.iws
+
+# Python distribution / packaging artifacts
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Logs and Database files (useful for your MariaDB integration)
+*.log
+*.pid
+*.db
+*.sqlite3
+*.sqlite3-journal
+
+# FastAPI specific artifacts
+instance/
+.webassets-cache
+
+# Coverage, testing, and pytest
+htmlcov/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+pytestdebug.log
+
+# Mypy, Pytype, Pyre (type checkers)
+.mypy_cache/
+.dmypy.json
+.pyre/
+pyre-check/
+.pytype/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Encrypted credentials, secrets (JWT keys, password files, etc.)
+*.pem
+*.key
+*.crt
+
+# Cache and temporary files (for modules like cachetools)
+.cache/
+*.cache
+
+# Pydantic and other generated schemas
+schemas/
+
+# VSCode settings (if applicable)
+.vscode/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# SageMath parsed files
+*.sage.py
+
+# Unit test artifacts
+.tox/
+.nox/
+*.cover
+*.py,cover
+nosetests.xml
+coverage.xml
+.hypothesis/
+
+# Temporary files and backups
+*.bak
+*.swp
+*~
+
+# Ignore your own local settings, secrets, and configurations
+local_settings.py
+.env
+
+# Thumbnails and generated content (optional)
+thumbs.db
+.DS_Store
