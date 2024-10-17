@@ -12,7 +12,7 @@ ALERTS_API_TOKEN = os.getenv("ALERTS_API_TOKEN")
 
 router = APIRouter()
 
-@router.get("/data")
+@router.get("/alerts-state")
 async def get_alerts(token: str = Query(...)):
     current_user = await get_current_user(token)
     username = current_user["username"]
