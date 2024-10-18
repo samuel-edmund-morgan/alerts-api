@@ -320,7 +320,7 @@ curl -X GET "https://your-domain-name/alerts-state?token=YOUR_ACCESS_TOKEN"
 
 ## Conclusion
 
-This guide provides a **complete setup for a production-ready FastAPI application** with **token-based authentication**, **Nginx**, and **HTTPS**. By using a **dedicated database user** and securing your environment with `.env` variables, you follow best practices for security.
+This guide provides a **complete setup for a production-ready FastAPI application** with **token-based authentication**.
 
 
 
