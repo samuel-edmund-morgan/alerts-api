@@ -1,5 +1,19 @@
 
+## Synopsis
 
+The API at [https://devs.alerts.in.ua](https://devs.alerts.in.ua) enforces both soft and hard rate limits of **8-10 requests per minute** per IP and token. 
+To bypass these restrictions, this project implements a **proxy API** that caches the data retrieved from **devs.alerts.in.ua**. With this approach, your server acts 
+as a middleware capable of handling as many requests as your hardware can support, while ensuring the upstream API is accessed no more than **7 times per minute**.
+
+This setup is essential for scenarios where you need frequent data access, such as in an **alert system for a company**. For example, multiple **IoT devices** might 
+need real-time alert data, but accessing the external API directly would exceed the allowed rate limit. With this solution, your server holds the **master API token** 
+(from `devs.alerts.in.ua`) and generates **slave API tokens** (your server tokens) that can be used by devices and applications as needed. 
+
+With caching in place, all connected devices get **up-to-date alerts information**, regardless of whether it’s for **one device or hundreds of devices**. This system provides 
+efficiency, scalability, and ensures that all IoT devices are in sync without violating the upstream API's rate limits.
+
+
+---
 
 ## Prerequisites
 
@@ -9,7 +23,7 @@
 
 2. **Fully Qualified Domain Name (FQDN)**:  
    - You must have control over a **domain name** and configure it via your **DNS provider** to point to your server’s IP address.  
-   Example: `your-domain-name`.
+     Example: `your-domain-name`.
 
 3. **API Key from Alerts.in.ua**:  
    - To use the alerts data, **register an application** at [https://devs.alerts.in.ua](https://devs.alerts.in.ua) and obtain an **API key**.
@@ -34,23 +48,33 @@ apt install mariadb-server mariadb-client libmariadb-dev
 mysql_secure_installation
 ```
 
-### 1.3 Create the Database and Tables
+### 1.3 Create the Database and a Dedicated User
 
-```bash
-mariadb -u root -p
-```
+1. **Log into the MariaDB shell**:
 
-Inside the MariaDB console:
+   ```bash
+   mariadb -u root -p
+   ```
 
-```sql
-CREATE DATABASE `api-db`;
-USE `api-db`;
+2. **Create the database** and a **dedicated user** (`db_api_user`):
 
-CREATE TABLE administrator (
-    username VARCHAR(50) PRIMARY KEY,
-    password VARCHAR(255) NOT NULL
-);
-```
+   ```sql
+   CREATE DATABASE `api-db`;
+   CREATE USER 'db_api_user'@'localhost' IDENTIFIED BY 'secure_password';
+   GRANT ALL PRIVILEGES ON `api-db`.* TO 'db_api_user'@'localhost';
+   FLUSH PRIVILEGES;
+   ```
+
+3. **Create the Administrator Table**:
+
+   ```sql
+   USE `api-db`;
+
+   CREATE TABLE administrator (
+       username VARCHAR(50) PRIMARY KEY,
+       password VARCHAR(255) NOT NULL
+   );
+   ```
 
 ### 1.4 Insert Admin Credentials
 
@@ -124,19 +148,24 @@ CREATE TABLE administrator (
 
 1. Create a `.env` file:
 
+   ```bash
+   nano /root/api/.env
+   ```
+
+   Add the following content:
+
    ```
    # .env
-   DB_USER=root
-   DB_PASSWORD=your_password
+   DB_USER=db_api_user
+   DB_PASSWORD=secure_password
    SECRET_KEY=your_secret_key  # A key you make up yourself
    ALERTS_API_TOKEN=your_alerts_api_token
    ```
 
 2. Add `.env` to `.gitignore`:
 
-   ```
-   # .gitignore
-   .env
+   ```bash
+   echo ".env" >> /root/api/.gitignore
    ```
 
 ---
@@ -210,7 +239,7 @@ apt install nginx certbot python3-certbot-nginx
 
 2. Insert the following content:
 
-   ```ini
+```
    [Unit]
    Description=FastAPI Application Service
    After=network.target
@@ -224,7 +253,7 @@ apt install nginx certbot python3-certbot-nginx
 
    [Install]
    WantedBy=multi-user.target
-   ```
+```
 
 3. Reload systemd:
 
@@ -255,6 +284,8 @@ apt install nginx certbot python3-certbot-nginx
 ## Step 6: Generate Token and Use the API
 
 ### 6.1 Generate a Token
+
+
 
 ```bash
 curl -X POST "https://your-domain-name/token" -H "Content-Type: application/x-www-form-urlencoded" --data-urlencode "username=administrator" --data-urlencode "password=your\$password"
@@ -289,4 +320,38 @@ curl -X GET "https://your-domain-name/alerts-state?token=YOUR_ACCESS_TOKEN"
 
 ## Conclusion
 
-This guide provides a **complete setup for a production-ready FastAPI application** with **token-based authentication**, **Nginx**, and **HTTPS**. Follow each step to ensure the system runs smoothly on startup with proper SSL security.
+This guide provides a **complete setup for a production-ready FastAPI application** with **token-based authentication**, **Nginx**, and **HTTPS**. By using a **dedicated database user** and securing your environment with `.env` variables, you follow best practices for security.
+
+
+
+## Usage Examples
+
+### Example 1: Using `curl` to Retrieve Alerts Data
+
+```bash
+curl -X GET "https://your-domain-name/alerts-state?token=YOUR_ACCESS_TOKEN"
+```
+
+### Example 2: Using the API Endpoint in Python Code
+
+```python
+import requests
+
+# Define the endpoint and the token
+url = "https://your-domain-name/alerts-state"
+params = {"token": "YOUR_ACCESS_TOKEN"}
+
+try:
+    # Send a GET request to the proxy API
+    response = requests.get(url, params=params)
+    response.raise_for_status()  # Raise an exception for HTTP errors
+
+    # Process the JSON response
+    data = response.json()
+    print("Alert Data:", data)
+
+except requests.exceptions.RequestException as e:
+    print(f"An error occurred: {e}")
+```
+
+This Python example demonstrates how to make a request to your API using the slave token. The `requests` library is used to send the request, and the response is processed as JSON.
